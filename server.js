@@ -4,7 +4,7 @@ const path = require('path');
 const app = express();
 
 // Variables directamente en el archivo
-const MONGODB_URI = 'mongodb+srv://usuario:contraseña@cluster.mongodb.net/dimelo';
+const MONGODB_URI = 'mongodb+srv://daniel:daniel25@dimelo.lg1arhx.mongodb.net/?retryWrites=true&w=majority&appName=admin';
 const PORT = 3000;
 
 app.use(express.json());
