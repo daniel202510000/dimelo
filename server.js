@@ -1,11 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
 const app = express();
 
 // Variables directamente en el archivo
 const MONGODB_URI = 'mongodb+srv://daniel:daniel25@dimelo.lg1arhx.mongodb.net/?retryWrites=true&w=majority&appName=admin';
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -14,6 +16,13 @@ app.use(express.static(__dirname));
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
+});
+
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*"
+    }
 });
 
 // Modelo de mensaje
@@ -35,9 +44,19 @@ app.post('/api/messages', async (req, res) => {
     const msg = new Message({ text });
     await msg.save();
     res.json(msg);
+    // Emitir el mensaje a todos los clientes conectados
+    io.emit('mensaje', msg);
+});
+
+// Socket.io conexión
+io.on('connection', (socket) => {
+    console.log('Usuario conectado:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('Usuario desconectado:', socket.id);
+    });
 });
 
 // Puerto para Render o local
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor escuchando en puerto ${PORT}`);
 });
